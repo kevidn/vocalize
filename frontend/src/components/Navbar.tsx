@@ -16,14 +16,16 @@ const contentAnimations = {
 
 const SPRING = { type: 'spring', bounce: 0.15, visualDuration: 0.2 };
 
-function SettingsTriggerIcon({ isHeader = false }: { isHeader?: boolean }) {
+function SettingsTriggerIcon() {
   return (
-    <div
+    <motion.div
+      layoutId="clerk-avatar"
+      transition={SPRING}
       className="w-10 h-10 rounded-full bg-[#191c1f] text-white flex items-center justify-center shrink-0 shadow-sm"
       title="Platform Settings & System Architecture"
     >
       <Menu className="w-5 h-5 text-[#e8f2e6]" />
-    </div>
+    </motion.div>
   );
 }
 
@@ -57,9 +59,9 @@ function MenuContent({
       className="absolute top-0 right-0 z-50 w-72 p-2 rounded-2xl bg-white border border-[#e5e9ec] shadow-xl flex flex-col gap-1"
       transition={SPRING}
     >
-      {/* Menu Header with Icon persistent */}
+      {/* Menu Header with Settings Trigger Icon Persistent */}
       <div className="flex items-center gap-3 p-2.5 border-b border-[#edf1f4]">
-        <SettingsTriggerIcon isHeader />
+        <SettingsTriggerIcon />
         <motion.div
           className="flex flex-col text-left"
           initial={contentAnimations.initial}
@@ -86,15 +88,6 @@ function MenuContent({
         >
           <Layers className="w-4 h-4 text-[#557352]" />
           <span>System Architecture Topology</span>
-        </MenuItem>
-
-        <MenuItem
-          onClick={() => {
-            alert('Speech-to-Text Model: Whisper-Large-v3 / Google Gemini 3.6 Flash\nStatus: Engine Operational (0.4x RTF)');
-          }}
-        >
-          <Sparkles className="w-4 h-4 text-[#d97706]" />
-          <span>Neural Engine Specs</span>
         </MenuItem>
 
         <MenuItem
