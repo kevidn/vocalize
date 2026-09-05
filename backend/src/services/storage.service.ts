@@ -1,11 +1,18 @@
 import fs from 'fs';
 import path from 'path';
+import os from 'os';
 import { logger } from '../utils/logger';
 import { ApiError } from '../utils/ApiError';
 
-const UPLOAD_DIR = path.resolve(
-  process.env.UPLOAD_DIR ?? (process.env.VERCEL ? '/tmp' : 'uploads'),
-);
+export function getUploadDir(): string {
+  if (process.env.UPLOAD_DIR) {
+    return path.resolve(process.env.UPLOAD_DIR);
+  }
+  if (process.env.VERCEL || process.env.NOW_REGION || process.env.AWS_EXECUTION_ENV) {
+    return os.tmpdir();
+  }
+  return path.resolve('uploads');
+}
 
 export class StorageService {
   /**
@@ -13,7 +20,8 @@ export class StorageService {
    * Throws 404 ApiError if the file does not exist.
    */
   getFilePath(fileName: string): string {
-    const filePath = path.join(UPLOAD_DIR, path.basename(fileName)); // prevent traversal
+    const uploadDir = getUploadDir();
+    const filePath = path.join(uploadDir, path.basename(fileName)); // prevent traversal
     if (!fs.existsSync(filePath)) {
       throw ApiError.notFound(`File "${fileName}"`);
     }
@@ -25,7 +33,8 @@ export class StorageService {
    * Fails silently if the file no longer exists.
    */
   async deleteFile(fileName: string): Promise<void> {
-    const filePath = path.join(UPLOAD_DIR, path.basename(fileName));
+    const uploadDir = getUploadDir();
+    const filePath = path.join(uploadDir, path.basename(fileName));
     try {
       await fs.promises.unlink(filePath);
       logger.debug(`Deleted upload: ${fileName}`);
@@ -49,17 +58,27 @@ export class StorageService {
    * Lists all files currently in the upload directory.
    */
   async listUploads(): Promise<string[]> {
-    const files = await fs.promises.readdir(UPLOAD_DIR);
-    return files.filter((f) => f !== '.gitkeep');
+    const uploadDir = getUploadDir();
+    try {
+      const files = await fs.promises.readdir(uploadDir);
+      return files.filter((f) => f !== '.gitkeep');
+    } catch {
+      return [];
+    }
   }
 
   /**
    * Ensures the upload directory exists (creates it if missing).
    */
   ensureUploadDir(): void {
-    if (!fs.existsSync(UPLOAD_DIR)) {
-      fs.mkdirSync(UPLOAD_DIR, { recursive: true });
-      logger.info(`Created upload directory: ${UPLOAD_DIR}`);
+    const uploadDir = getUploadDir();
+    try {
+      if (!fs.existsSync(uploadDir)) {
+        fs.mkdirSync(uploadDir, { recursive: true });
+        logger.info(`Created upload directory: ${uploadDir}`);
+      }
+    } catch (err: unknown) {
+      logger.warn(`Notice: Upload directory "${uploadDir}" creation skipped/ignored:`, err);
     }
   }
 }

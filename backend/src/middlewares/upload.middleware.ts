@@ -1,16 +1,12 @@
 import multer from 'multer';
 import path from 'path';
+import fs from 'fs';
 import { v4 as uuidv4 } from 'uuid';
 import { ApiError } from '../utils/ApiError';
-
-// ─── Configuration ─────────────────────────────────────────────────────────
+import { getUploadDir } from '../services/storage.service';
 
 const MAX_FILE_SIZE_BYTES =
   parseInt(process.env.MAX_FILE_SIZE_MB ?? '50', 10) * 1024 * 1024;
-
-const UPLOAD_DIR = path.resolve(
-  process.env.UPLOAD_DIR ?? (process.env.VERCEL ? '/tmp' : 'uploads'),
-);
 
 export const ALLOWED_MIME_TYPES: readonly string[] = [
   'audio/mpeg',        // .mp3
@@ -41,7 +37,13 @@ export const SUPPORTED_FORMATS = [
 
 const storage = multer.diskStorage({
   destination: (_req, _file, cb) => {
-    cb(null, UPLOAD_DIR);
+    const dir = getUploadDir();
+    try {
+      if (!fs.existsSync(dir)) {
+        fs.mkdirSync(dir, { recursive: true });
+      }
+    } catch {}
+    cb(null, dir);
   },
   filename: (_req, file, cb) => {
     const ext = path.extname(file.originalname).toLowerCase();

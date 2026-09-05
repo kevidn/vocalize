@@ -5,7 +5,7 @@ import path from 'path';
 
 import { requestLoggerMiddleware } from './middlewares/requestLogger.middleware';
 import { errorMiddleware } from './middlewares/error.middleware';
-import { storageService } from './services/storage.service';
+import { storageService, getUploadDir } from './services/storage.service';
 import audioRoutes from './routes/audio.routes';
 import { logger } from './utils/logger';
 
@@ -35,7 +35,7 @@ app.use(requestLoggerMiddleware);
 
 // ─── Static: serve processed audio previews (optional future use) ───────────
 
-app.use('/uploads', express.static(path.resolve(process.env.UPLOAD_DIR ?? 'uploads')));
+app.use('/uploads', express.static(getUploadDir()));
 
 // ─── API Routes ─────────────────────────────────────────────────────────────
 
