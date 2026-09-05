@@ -16,16 +16,14 @@ const contentAnimations = {
 
 const SPRING = { type: 'spring', bounce: 0.15, visualDuration: 0.2 };
 
-function SettingsTriggerIcon() {
+function SettingsTriggerIcon({ isHeader = false }: { isHeader?: boolean }) {
   return (
-    <motion.div
-      layoutId="clerk-avatar"
-      transition={SPRING}
-      className="w-10 h-10 rounded-2xl bg-[#191c1f] hover:bg-[#2d3136] text-white flex items-center justify-center cursor-pointer shadow-sm transition-colors shrink-0"
+    <div
+      className="w-10 h-10 rounded-full bg-[#191c1f] text-white flex items-center justify-center shrink-0 shadow-sm"
       title="Platform Settings & System Architecture"
     >
       <Menu className="w-5 h-5 text-[#e8f2e6]" />
-    </motion.div>
+    </div>
   );
 }
 
@@ -56,12 +54,12 @@ function MenuContent({
   return (
     <motion.div
       layoutId="clerk-userbtn"
-      className="absolute top-0 right-0 z-50 w-64 p-2 rounded-2xl bg-white border border-[#e5e9ec] shadow-xl flex flex-col gap-1"
+      className="absolute top-0 right-0 z-50 w-72 p-2 rounded-2xl bg-white border border-[#e5e9ec] shadow-xl flex flex-col gap-1"
       transition={SPRING}
     >
-      {/* Menu Header with Settings Trigger Icon Persistent */}
+      {/* Menu Header with Icon persistent */}
       <div className="flex items-center gap-3 p-2.5 border-b border-[#edf1f4]">
-        <SettingsTriggerIcon />
+        <SettingsTriggerIcon isHeader />
         <motion.div
           className="flex flex-col text-left"
           initial={contentAnimations.initial}
@@ -69,12 +67,13 @@ function MenuContent({
           exit={contentAnimations.exit}
         >
           <p className="text-xs font-bold text-[#191c1f]">{user.fullName}</p>
-          <p className="text-[11px] text-[#5f6c7b] truncate max-w-[140px]">{user.email}</p>
+          <p className="text-[11px] text-[#5f6c7b] truncate max-w-[150px]">{user.email}</p>
         </motion.div>
       </div>
 
+      {/* Menu Items */}
       <motion.div
-        className="flex flex-col gap-1 p-1"
+        className="flex flex-col gap-0.5 p-1"
         initial={contentAnimations.initial}
         animate={contentAnimations.animate}
         exit={contentAnimations.exit}
@@ -86,7 +85,25 @@ function MenuContent({
           }}
         >
           <Layers className="w-4 h-4 text-[#557352]" />
-          <span>System Architecture & Specs</span>
+          <span>System Architecture Topology</span>
+        </MenuItem>
+
+        <MenuItem
+          onClick={() => {
+            alert('Speech-to-Text Model: Whisper-Large-v3 / Google Gemini 3.6 Flash\nStatus: Engine Operational (0.4x RTF)');
+          }}
+        >
+          <Sparkles className="w-4 h-4 text-[#d97706]" />
+          <span>Neural Engine Specs</span>
+        </MenuItem>
+
+        <MenuItem
+          onClick={() => {
+            window.open('https://github.com/kevidn/vocalize', '_blank');
+          }}
+        >
+          <Cloud className="w-4 h-4 text-[#0284c7]" />
+          <span>GitHub Source Repository</span>
         </MenuItem>
       </motion.div>
     </motion.div>
@@ -118,17 +135,16 @@ function SettingsUserButton({ onOpenArchitecture }: { onOpenArchitecture: () => 
     <div className="relative inline-block" ref={rootRef}>
       <AnimatePresence>
         {!open ? (
-          <motion.button
+          <motion.div
             key="closed"
             layoutId="clerk-userbtn"
-            className="p-0 border-0 bg-transparent cursor-pointer flex items-center justify-center"
-            style={{ borderRadius: 16 }}
+            className="p-0 rounded-full bg-[#191c1f] hover:bg-[#2d3136] cursor-pointer flex items-center justify-center shadow-sm"
             transition={SPRING}
             onClick={() => setOpen(true)}
             aria-label="Open system menu"
           >
             <SettingsTriggerIcon />
-          </motion.button>
+          </motion.div>
         ) : (
           <MenuContent
             key="open"
