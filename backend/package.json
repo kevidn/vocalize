@@ -1,0 +1,40 @@
+{
+  "name": "vocalize-backend",
+  "version": "1.0.0",
+  "description": "Vocalize AI Speech Processing Platform — Backend API",
+  "main": "dist/app.js",
+  "scripts": {
+    "dev": "nodemon",
+    "build": "tsc --project tsconfig.json",
+    "start": "node dist/app.js",
+    "lint": "eslint 'src/**/*.ts'",
+    "test": "echo \"No tests configured yet\" && exit 0"
+  },
+  "keywords": [
+    "vocalize",
+    "speech-to-text",
+    "audio",
+    "express",
+    "typescript"
+  ],
+  "author": "",
+  "license": "ISC",
+  "dependencies": {
+    "cors": "^2.8.5",
+    "dotenv": "^16.0.0",
+    "express": "^4.18.2",
+    "multer": "^2.3.0",
+    "uuid": "^11.1.1"
+  },
+  "devDependencies": {
+    "@types/cors": "^2.8.13",
+    "@types/express": "^4.17.17",
+    "@types/multer": "^1.4.7",
+    "@types/node": "^20.0.0",
+    "@types/uuid": "^9.0.2",
+    "nodemon": "^3.0.0",
+    "ts-node": "^10.9.1",
+    "tsx": "^4.23.13",
+    "typescript": "^5.1.3"
+  }
+}

@@ -1,0 +1,66 @@
+name: Vocalize CI Pipeline
+
+on:
+  push:
+    branches: [ main, master, develop ]
+  pull_request:
+    branches: [ main, master ]
+
+jobs:
+  # ─── 1. Quality & Type Checking ──────────────────────────────────────────
+  typecheck-and-build:
+    name: Typecheck & Compilation
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js Environment
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: 'npm'
+
+      # Backend Checks
+      - name: Install Backend Dependencies
+        run: npm --prefix backend ci
+
+      - name: Compile Backend TypeScript
+        run: npm --prefix backend run build
+
+      # Frontend Checks
+      - name: Install Frontend Dependencies
+        run: npm --prefix frontend ci
+
+      - name: Build Frontend Application
+        run: npm --prefix frontend run build
+
+  # ─── 2. Container Validation ─────────────────────────────────────────────
+  docker-validation:
+    name: Docker Image Build Validation
+    needs: typecheck-and-build
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v4
+
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3
+
+      - name: Build Backend Docker Image
+        uses: docker/build-push-action@v5
+        with:
+          context: ./backend
+          file: ./backend/Dockerfile
+          push: false
+          tags: vocalize-backend:test
+
+      - name: Build Frontend Docker Image
+        uses: docker/build-push-action@v5
+        with:
+          context: ./frontend
+          file: ./frontend/Dockerfile
+          push: false
+          tags: vocalize-frontend:test

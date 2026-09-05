@@ -1,0 +1,104 @@
+@import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600&display=swap');
+
+@import "tailwindcss";
+
+:root {
+  /* Medical Dashboard Inspired Pastel Light Palette */
+  --bg-app: #edf0f3;
+  --bg-card: #ffffff;
+  --bg-card-subtle: #f8fafb;
+  
+  --color-sage-900: #263825;
+  --color-sage-800: #3b5439;
+  --color-sage-700: #4a6b47;
+  --color-sage-600: #557352;
+  --color-sage-500: #6b8f68;
+  --color-sage-100: #e8f2e6;
+  --color-sage-50: #f2f8f1;
+  
+  --color-pastel-purple: #f3e8ff;
+  --color-pastel-purple-text: #6b21a8;
+  --color-pastel-amber: #fef3c7;
+  --color-pastel-amber-text: #92400e;
+  --color-pastel-blue: #e0f2fe;
+  --color-pastel-blue-text: #0369a1;
+
+  --text-primary: #191c1f;
+  --text-secondary: #5f6c7b;
+  --text-muted: #8c9ba5;
+  
+  --border-light: #e5e9ec;
+  --border-subtle: #edf1f4;
+}
+
+*, *::before, *::after {
+  box-sizing: border-box;
+}
+
+html, body, #root {
+  min-height: 100%;
+  margin: 0;
+  padding: 0;
+}
+
+body {
+  font-family: 'Plus Jakarta Sans', system-ui, -apple-system, sans-serif;
+  background-color: var(--bg-app);
+  color: var(--text-primary);
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  zoom: 0.75;
+}
+
+code, pre, .font-mono {
+  font-family: 'JetBrains Mono', monospace;
+}
+
+/* Custom Light Dashboard Cards */
+.dash-card {
+  background-color: #ffffff;
+  border-radius: 1.25rem;
+  box-shadow: 0 4px 20px -2px rgba(15, 23, 42, 0.04), 0 2px 6px -1px rgba(15, 23, 42, 0.02);
+  border: 1px solid rgba(229, 233, 236, 0.8);
+}
+
+.dash-card-hover {
+  background-color: #ffffff;
+  border-radius: 1.25rem;
+  box-shadow: 0 4px 20px -2px rgba(15, 23, 42, 0.04), 0 2px 6px -1px rgba(15, 23, 42, 0.02);
+  border: 1px solid rgba(229, 233, 236, 0.8);
+  transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.dash-card-hover:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 10px 25px -4px rgba(15, 23, 42, 0.06), 0 4px 10px -2px rgba(15, 23, 42, 0.03);
+  border-color: #cbd5e1;
+}
+
+/* Custom Scrollbar for Light Theme */
+::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+::-webkit-scrollbar-track {
+  background: #f1f4f7;
+  border-radius: 9999px;
+}
+::-webkit-scrollbar-thumb {
+  background: #cbd5e1;
+  border-radius: 9999px;
+}
+::-webkit-scrollbar-thumb:hover {
+  background: #94a3b8;
+}
+
+/* Waveform soundwave animation */
+@keyframes soundwave-light {
+  0%, 100% { height: 20%; opacity: 0.5; }
+  50% { height: 90%; opacity: 1; }
+}
+
+.soundwave-bar-light {
+  animation: soundwave-light 1.1s ease-in-out infinite alternate;
+}
