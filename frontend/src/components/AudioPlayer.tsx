@@ -138,6 +138,13 @@ export const AudioPlayer: React.FC<AudioPlayerProps> = ({
       stopSpeech();
       setIsPlaying(false);
     } else {
+      // If speech is enabled, mute HTML audio element to avoid synthetic tone squeaking
+      if (speechEnabled) {
+        audioRef.current.volume = 0;
+      } else {
+        audioRef.current.volume = volume;
+      }
+
       audioRef.current
         .play()
         .then(() => {
@@ -362,8 +369,20 @@ export const AudioPlayer: React.FC<AudioPlayerProps> = ({
           <div className="flex items-center gap-2">
             <button
               onClick={() => {
-                setSpeechEnabled(!speechEnabled);
-                if (speechEnabled) stopSpeech();
+                const nextSpeechState = !speechEnabled;
+                setSpeechEnabled(nextSpeechState);
+                if (nextSpeechState) {
+                  // Mute synthetic beep audio element so only clean AI voice narrator is heard
+                  if (audioRef.current) audioRef.current.volume = 0;
+                  const currentSegIdx = segments.findIndex(
+                    (s) => currentTime >= s.start && currentTime <= s.end
+                  );
+                  speakFromSegment(currentSegIdx !== -1 ? currentSegIdx : 0);
+                } else {
+                  stopSpeech();
+                  // Restore natural audio volume
+                  if (audioRef.current) audioRef.current.volume = isMuted ? 0 : volume;
+                }
               }}
               className={`flex items-center gap-2 px-3.5 py-1.5 rounded-full text-xs font-semibold transition-all cursor-pointer border ${
                 speechEnabled
