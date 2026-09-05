@@ -172,26 +172,35 @@ export const DropZone: React.FC<DropZoneProps> = ({
           </div>
         </div>
 
-        {/* Live Mic Voice Dictation Button */}
+        {/* Live Mic Voice Dictation Button (Redesigned & Prominent) */}
         <div>
           {!isRecording ? (
             <button
               type="button"
               disabled={disabled}
               onClick={startRecording}
-              className="flex items-center gap-2 px-4 py-1.5 rounded-full bg-[#ef4444] hover:bg-[#dc2626] text-white text-xs font-bold transition-all shadow-xs cursor-pointer"
+              className="group relative flex items-center gap-2.5 px-5 py-2.5 rounded-full bg-gradient-to-r from-[#dc2626] to-[#ef4444] hover:from-[#b91c1c] hover:to-[#dc2626] text-white text-xs font-extrabold shadow-md shadow-[#dc2626]/25 hover:shadow-lg hover:shadow-[#dc2626]/40 hover:scale-[1.03] active:scale-[0.98] transition-all duration-200 cursor-pointer border border-red-400/30"
             >
-              <Mic className="w-3.5 h-3.5" />
-              <span>Record Live Voice</span>
+              <div className="w-5 h-5 rounded-full bg-white/20 flex items-center justify-center shrink-0 group-hover:scale-110 transition-transform">
+                <Mic className="w-3.5 h-3.5 text-white fill-white" />
+              </div>
+              <span className="tracking-wide">RECORD LIVE VOICE</span>
+              <span className="w-2 h-2 rounded-full bg-white animate-ping shrink-0 opacity-75" />
             </button>
           ) : (
             <button
               type="button"
               onClick={stopRecording}
-              className="flex items-center gap-2 px-4 py-1.5 rounded-full bg-[#191c1f] text-white text-xs font-bold animate-pulse shadow-xs cursor-pointer"
+              className="flex items-center gap-3 px-6 py-2.5 rounded-full bg-[#191c1f] hover:bg-[#2d3136] text-white text-xs font-extrabold shadow-lg shadow-black/20 hover:scale-[1.02] active:scale-[0.98] transition-all duration-200 cursor-pointer border border-red-500/40"
             >
-              <Square className="w-3.5 h-3.5 text-[#ef4444] fill-[#ef4444]" />
-              <span>Recording... ({recordingTime}s) - Click Stop</span>
+              <span className="relative flex h-3 w-3">
+                <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-red-400 opacity-75"></span>
+                <span className="relative inline-flex rounded-full h-3 w-3 bg-red-500"></span>
+              </span>
+              <span>RECORDING ({recordingTime}s)</span>
+              <span className="px-2 py-0.5 rounded-md bg-red-500/20 text-red-400 text-[10px] font-bold uppercase tracking-wider">
+                Click Stop
+              </span>
             </button>
           )}
         </div>
