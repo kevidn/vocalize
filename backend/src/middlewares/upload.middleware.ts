@@ -8,7 +8,9 @@ import { ApiError } from '../utils/ApiError';
 const MAX_FILE_SIZE_BYTES =
   parseInt(process.env.MAX_FILE_SIZE_MB ?? '50', 10) * 1024 * 1024;
 
-const UPLOAD_DIR = path.resolve(process.env.UPLOAD_DIR ?? 'uploads');
+const UPLOAD_DIR = path.resolve(
+  process.env.UPLOAD_DIR ?? (process.env.VERCEL ? '/tmp' : 'uploads'),
+);
 
 export const ALLOWED_MIME_TYPES: readonly string[] = [
   'audio/mpeg',        // .mp3

@@ -3,7 +3,9 @@ import path from 'path';
 import { logger } from '../utils/logger';
 import { ApiError } from '../utils/ApiError';
 
-const UPLOAD_DIR = path.resolve(process.env.UPLOAD_DIR ?? 'uploads');
+const UPLOAD_DIR = path.resolve(
+  process.env.UPLOAD_DIR ?? (process.env.VERCEL ? '/tmp' : 'uploads'),
+);
 
 export class StorageService {
   /**

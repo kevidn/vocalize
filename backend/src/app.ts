@@ -69,16 +69,18 @@ app.use(errorMiddleware);
 
 // ─── Start server ────────────────────────────────────────────────────────────
 
-app.listen(PORT, () => {
-  logger.success(`🎙️  Vocalize backend ready on http://localhost:${PORT}`);
-  logger.info(`   Environment : ${process.env.NODE_ENV ?? 'development'}`);
-  logger.info(`   CORS origin : ${process.env.CORS_ORIGIN ?? 'http://localhost:5173'}`);
-  logger.info(`   Upload dir  : ${path.resolve(process.env.UPLOAD_DIR ?? 'uploads')}`);
-  logger.info(`   Endpoints:`);
-  logger.info(`     GET  /health`);
-  logger.info(`     GET  /api/audio/health`);
-  logger.info(`     GET  /api/audio/formats`);
-  logger.info(`     POST /api/audio/transcribe`);
-});
+if (!process.env.VERCEL) {
+  app.listen(PORT, () => {
+    logger.success(`🎙️  Vocalize backend ready on http://localhost:${PORT}`);
+    logger.info(`   Environment : ${process.env.NODE_ENV ?? 'development'}`);
+    logger.info(`   CORS origin : ${process.env.CORS_ORIGIN ?? 'http://localhost:5173'}`);
+    logger.info(`   Upload dir  : ${path.resolve(process.env.UPLOAD_DIR ?? 'uploads')}`);
+    logger.info(`   Endpoints:`);
+    logger.info(`     GET  /health`);
+    logger.info(`     GET  /api/audio/health`);
+    logger.info(`     GET  /api/audio/formats`);
+    logger.info(`     POST /api/audio/transcribe`);
+  });
+}
 
 export default app;
