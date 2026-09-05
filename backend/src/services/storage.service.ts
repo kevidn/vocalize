@@ -5,12 +5,23 @@ import { logger } from '../utils/logger';
 import { ApiError } from '../utils/ApiError';
 
 export function getUploadDir(): string {
+  // On Vercel / AWS Lambda / Serverless Functions, /var/task is read-only.
+  // We MUST use os.tmpdir() (/tmp) for file writes.
+  const isServerless =
+    Boolean(process.env.VERCEL) ||
+    Boolean(process.env.NOW_REGION) ||
+    Boolean(process.env.AWS_EXECUTION_ENV) ||
+    Boolean(process.env.LAMBDA_TASK_ROOT) ||
+    process.cwd().startsWith('/var/task');
+
+  if (isServerless) {
+    return os.tmpdir();
+  }
+
   if (process.env.UPLOAD_DIR) {
     return path.resolve(process.env.UPLOAD_DIR);
   }
-  if (process.env.VERCEL || process.env.NOW_REGION || process.env.AWS_EXECUTION_ENV) {
-    return os.tmpdir();
-  }
+
   return path.resolve('uploads');
 }
 
