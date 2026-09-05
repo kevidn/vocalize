@@ -48,6 +48,24 @@ export const AudioPlayer: React.FC<AudioPlayerProps> = ({
     }
   }, []);
 
+  const [availableVoices, setAvailableVoices] = useState<SpeechSynthesisVoice[]>([]);
+  const [selectedVoiceURI, setSelectedVoiceURI] = useState<string>('');
+
+  // Load browser TTS voices
+  useEffect(() => {
+    if (!('speechSynthesis' in window)) return;
+    const updateVoices = () => {
+      const voices = window.speechSynthesis.getVoices();
+      setAvailableVoices(voices);
+      if (voices.length > 0 && !selectedVoiceURI) {
+        const defaultVoice = voices.find((v) => v.lang.startsWith('en') || v.lang.startsWith('id')) || voices[0];
+        setSelectedVoiceURI(defaultVoice.voiceURI);
+      }
+    };
+    updateVoices();
+    window.speechSynthesis.onvoiceschanged = updateVoices;
+  }, [selectedVoiceURI]);
+
   // Speak text starting from a given segment
   const speakFromSegment = useCallback(
     (segIndex: number) => {
@@ -63,17 +81,17 @@ export const AudioPlayer: React.FC<AudioPlayerProps> = ({
       const utterance = new SpeechSynthesisUtterance(textToSpeak);
       utterance.rate = playbackRate;
       utterance.volume = isMuted ? 0 : volume;
-      utterance.lang = 'en-US';
 
-      const voices = window.speechSynthesis.getVoices();
-      const engVoice = voices.find((v) => v.lang.startsWith('en') && (v.name.includes('Google') || v.name.includes('Natural') || v.name.includes('David') || v.name.includes('Zira')));
-      if (engVoice) utterance.voice = engVoice;
+      if (selectedVoiceURI && availableVoices.length > 0) {
+        const chosen = availableVoices.find((v) => v.voiceURI === selectedVoiceURI);
+        if (chosen) utterance.voice = chosen;
+      }
 
       lastSpokenSegIdRef.current = seg.id;
       utteranceRef.current = utterance;
       window.speechSynthesis.speak(utterance);
     },
-    [segments, speechEnabled, playbackRate, isMuted, volume, stopSpeech]
+    [segments, speechEnabled, playbackRate, isMuted, volume, stopSpeech, selectedVoiceURI, availableVoices]
   );
 
   // Monitor segment changes during playback and trigger speech
@@ -340,22 +358,38 @@ export const AudioPlayer: React.FC<AudioPlayerProps> = ({
             <RotateCcw className="w-4 h-4" />
           </button>
 
-          {/* AI Spoken Voice Switch */}
-          <button
-            onClick={() => {
-              setSpeechEnabled(!speechEnabled);
-              if (speechEnabled) stopSpeech();
-            }}
-            className={`flex items-center gap-2 px-3.5 py-1.5 rounded-full text-xs font-semibold transition-all cursor-pointer border ${
-              speechEnabled
-                ? 'bg-[#e8f2e6] text-[#2d6329] border-[#c4dec1]'
-                : 'bg-[#f1f4f7] text-[#5f6c7b] border-[#e5e9ec] hover:bg-[#e2e7ec]'
-            }`}
-            title="Toggle AI voice readout"
-          >
-            <Volume1 className={`w-3.5 h-3.5 ${speechEnabled ? 'text-[#2d6329]' : 'text-[#8c9ba5]'}`} />
-            <span>{speechEnabled ? 'AI Voice: ON' : 'AI Voice: OFF'}</span>
-          </button>
+          {/* AI Spoken Voice Switch & Voice Selector */}
+          <div className="flex items-center gap-2">
+            <button
+              onClick={() => {
+                setSpeechEnabled(!speechEnabled);
+                if (speechEnabled) stopSpeech();
+              }}
+              className={`flex items-center gap-2 px-3.5 py-1.5 rounded-full text-xs font-semibold transition-all cursor-pointer border ${
+                speechEnabled
+                  ? 'bg-[#e8f2e6] text-[#2d6329] border-[#c4dec1]'
+                  : 'bg-[#f1f4f7] text-[#5f6c7b] border-[#e5e9ec] hover:bg-[#e2e7ec]'
+              }`}
+              title="Toggle AI voice readout"
+            >
+              <Volume1 className={`w-3.5 h-3.5 ${speechEnabled ? 'text-[#2d6329]' : 'text-[#8c9ba5]'}`} />
+              <span>{speechEnabled ? 'AI Voice: ON' : 'AI Voice: OFF'}</span>
+            </button>
+
+            {speechEnabled && availableVoices.length > 0 && (
+              <select
+                value={selectedVoiceURI}
+                onChange={(e) => setSelectedVoiceURI(e.target.value)}
+                className="bg-[#ffffff] border border-[#c4dec1] text-[#2d6329] text-xs font-semibold px-2.5 py-1.5 rounded-full outline-none cursor-pointer max-w-[140px] truncate"
+              >
+                {availableVoices.map((v) => (
+                  <option key={v.voiceURI} value={v.voiceURI}>
+                    {v.name} ({v.lang})
+                  </option>
+                ))}
+              </select>
+            )}
+          </div>
         </div>
 
         {/* Right: Playback Speed & Volume Slider */}

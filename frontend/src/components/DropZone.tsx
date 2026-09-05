@@ -1,5 +1,5 @@
 import React, { useState, useRef, useCallback } from 'react';
-import { Upload, FileAudio, AlertCircle, CheckCircle2, Play, Sparkles } from 'lucide-react';
+import { Upload, FileAudio, AlertCircle, CheckCircle2, Play, Sparkles, Mic, Square } from 'lucide-react';
 import { createAudibleSampleAudio } from '../utils/audioGenerator';
 
 interface DropZoneProps {
@@ -20,7 +20,56 @@ export const DropZone: React.FC<DropZoneProps> = ({
   const [isDragging, setIsDragging] = useState(false);
   const [validationError, setValidationError] = useState<string | null>(null);
   const [activePreset, setActivePreset] = useState<string | null>(null);
+  const [isRecording, setIsRecording] = useState(false);
+  const [recordingTime, setRecordingTime] = useState(0);
+
   const fileInputRef = useRef<HTMLInputElement>(null);
+  const mediaRecorderRef = useRef<MediaRecorder | null>(null);
+  const audioChunksRef = useRef<Blob[]>([]);
+  const recTimerRef = useRef<number | null>(null);
+
+  const startRecording = async () => {
+    try {
+      setValidationError(null);
+      const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+      audioChunksRef.current = [];
+      const mediaRecorder = new MediaRecorder(stream);
+      mediaRecorderRef.current = mediaRecorder;
+
+      mediaRecorder.ondataavailable = (event) => {
+        if (event.data.size > 0) {
+          audioChunksRef.current.push(event.data);
+        }
+      };
+
+      mediaRecorder.onstop = () => {
+        const audioBlob = new Blob(audioChunksRef.current, { type: 'audio/webm' });
+        const recordedFile = new File([audioBlob], `live_voice_record_${Date.now()}.webm`, {
+          type: 'audio/webm',
+        });
+        onFileSelected(recordedFile);
+        stream.getTracks().forEach((track) => track.stop());
+      };
+
+      mediaRecorder.start();
+      setIsRecording(true);
+      setRecordingTime(0);
+
+      recTimerRef.current = window.setInterval(() => {
+        setRecordingTime((prev) => prev + 1);
+      }, 1000);
+    } catch {
+      setValidationError('Microphone access denied. Please grant permission to record audio.');
+    }
+  };
+
+  const stopRecording = () => {
+    if (mediaRecorderRef.current && isRecording) {
+      mediaRecorderRef.current.stop();
+      setIsRecording(false);
+      if (recTimerRef.current) clearInterval(recTimerRef.current);
+    }
+  };
 
   const validateAndSelectFile = (file: File) => {
     setValidationError(null);
@@ -88,13 +137,13 @@ export const DropZone: React.FC<DropZoneProps> = ({
 
   return (
     <div className="w-full flex flex-col gap-5">
-      {/* Presets Filter Chips Bar (Styled like image_2.png navigation pills) */}
+      {/* Presets Filter Chips Bar & Live Voice Dictation Button */}
       <div className="flex flex-wrap items-center justify-between gap-3 px-1">
-        <div className="flex items-center gap-2">
+        <div className="flex flex-wrap items-center gap-2">
           <span className="text-xs font-bold text-[#5f6c7b] uppercase tracking-wider flex items-center gap-1.5">
             <Sparkles className="w-3.5 h-3.5 text-[#557352]" /> Sample Presets:
           </span>
-          <div className="flex items-center gap-2 p-1 bg-[#ffffff] rounded-full border border-[#e5e9ec] shadow-xs">
+          <div className="flex flex-wrap items-center gap-2 p-1 bg-[#ffffff] rounded-full border border-[#e5e9ec] shadow-xs">
             {[
               { id: 'tech', name: 'q3_earnings_briefing', dur: 28, label: '💼 Tech Meeting' },
               { id: 'podcast', name: 'ai_podcast_episode_42', dur: 36, label: '🎙️ AI Podcast' },
@@ -105,7 +154,7 @@ export const DropZone: React.FC<DropZoneProps> = ({
                 <button
                   key={p.id}
                   type="button"
-                  disabled={disabled}
+                  disabled={disabled || isRecording}
                   onClick={(e) => {
                     e.stopPropagation();
                     handleLoadSample(p.name, p.dur, p.label);
@@ -123,8 +172,28 @@ export const DropZone: React.FC<DropZoneProps> = ({
           </div>
         </div>
 
-        <div className="text-xs text-[#8c9ba5] font-medium hidden sm:block">
-          Max file size: 50MB
+        {/* Live Mic Voice Dictation Button */}
+        <div>
+          {!isRecording ? (
+            <button
+              type="button"
+              disabled={disabled}
+              onClick={startRecording}
+              className="flex items-center gap-2 px-4 py-1.5 rounded-full bg-[#ef4444] hover:bg-[#dc2626] text-white text-xs font-bold transition-all shadow-xs cursor-pointer"
+            >
+              <Mic className="w-3.5 h-3.5" />
+              <span>Record Live Voice</span>
+            </button>
+          ) : (
+            <button
+              type="button"
+              onClick={stopRecording}
+              className="flex items-center gap-2 px-4 py-1.5 rounded-full bg-[#191c1f] text-white text-xs font-bold animate-pulse shadow-xs cursor-pointer"
+            >
+              <Square className="w-3.5 h-3.5 text-[#ef4444] fill-[#ef4444]" />
+              <span>Recording... ({recordingTime}s) - Click Stop</span>
+            </button>
+          )}
         </div>
       </div>
 
